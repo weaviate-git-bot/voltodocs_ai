@@ -1,3 +1,3 @@
-from voltodocs.chain import chain
+from .chain import make_chain
 
-__all__ = ["chain"]
+__all__ = ["make_chain"]
