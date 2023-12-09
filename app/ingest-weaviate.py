@@ -67,11 +67,11 @@ def load_documents(source_dir: str) -> list[Document]:
     paths = []
     for root, _, files in os.walk(source_dir):
         for file_name in files:
-            print("Importing: " + file_name)
             file_extension = os.path.splitext(file_name)[1]
             source_file_path = os.path.join(root, file_name)
             if file_extension in DOCUMENT_MAP.keys():
                 paths.append(source_file_path)
+                print("Importing: " + file_name)
 
     # Have at least one worker and at most INGEST_THREADS workers
     n_workers = min(INGEST_THREADS, max(len(paths), 1))
@@ -191,11 +191,27 @@ def main(device_type):
     )
 
     if texts:
+        # import weaviate
+        # client = weaviate.Client(
+        #     url=WEAVIATE_URL,
+        # )
+        # db = Weaviate(
+        #     client=client,
+        #     text_key="text",
+        #     index_name="voltodocs",
+        #     embeddings,
+        # )
+        # db.add_documents(texts)
+
         db = Weaviate.from_documents(
             texts,
-            embeddings,
             weaviate_url=WEAVIATE_URL,
+            embedding=embeddings,
+            # index_name="voltodocs",
+            # text_key="text",
         )
+        print(f"Indexed in index: {db._index_name}")
+
         query = "What is Volto?"
         docs = db.similarity_search(query)
         assert len(docs) > 0

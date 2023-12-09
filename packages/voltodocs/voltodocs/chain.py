@@ -1,14 +1,17 @@
-# Load
-from langchain.embeddings import OllamaEmbeddings
+import weaviate
+from langchain.vectorstores import Weaviate
+from langchain.embeddings import HuggingFaceInstructEmbeddings
 from langchain.chat_models import ChatOllama
-from langchain.document_loaders import WebBaseLoader
-from langchain.embeddings import GPT4AllEmbeddings
 from langchain.prompts import ChatPromptTemplate
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.output_parser import StrOutputParser
 from langchain.schema.runnable import RunnableParallel, RunnablePassthrough
-from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain.vectorstores import Chroma
+
+# from langchain.embeddings import OllamaEmbeddings
+# from langchain.document_loaders import WebBaseLoader
+# from langchain.embeddings import GPT4AllEmbeddings
+# from langchain.text_splitter import RecursiveCharacterTextSplitter
+# from langchain.vectorstores import Chroma
 
 
 # Add typing for input
@@ -17,39 +20,22 @@ class Question(BaseModel):
 
 
 def make_chain(
-    CHROMA_SETTINGS,
-    DOCUMENT_MAP,
+    WEAVIATE_URL,
     EMBEDDING_MODEL_NAME,
-    INGEST_THREADS,
-    PERSIST_DIRECTORY,
-    SOURCE_DIRECTORY,
 ):
-    # pass
-    # loader = WebBaseLoader(
-    #     "https://lilianweng.github.io/posts/2023-06-23-agent/")
-    # data = loader.load()
-
-    # Split
-
-    # text_splitter = RecursiveCharacterTextSplitter(
-    #     chunk_size=500, chunk_overlap=0)
-    # all_splits = text_splitter.split_documents(data)
-
-    # Add to vectorDB
-    embeddings = OllamaEmbeddings(
-        model=EMBEDDING_MODEL_NAME,
-        # model_kwargs={"device": device_type},
+    embeddings = HuggingFaceInstructEmbeddings(
+        model_name=EMBEDDING_MODEL_NAME,
+        model_kwargs={"device": "cuda"},
     )
-    vectorstore = Chroma(
-        embedding_function=embeddings,
-        persist_directory=PERSIST_DIRECTORY,
+    client = weaviate.Client(
+        url=WEAVIATE_URL,
     )
-    # .from_documents(
-    #     # documents=all_splits,
-    #     # collection_name="rag-private",
-    #     # embedding=GPT4AllEmbeddings(),
-    # )
-    retriever = vectorstore.as_retriever()
+    db = Weaviate(
+        client=client,
+        text_key="text",
+        index_name="voltodocs",
+    )
+    retriever = db.as_retriever()
 
     # Prompt
     # Optionally, pull from the Hub
@@ -64,7 +50,6 @@ def make_chain(
     prompt = ChatPromptTemplate.from_template(template)
 
     # LLM
-    # Select the LLM that you downloaded
     ollama_llm = "llama2:7b-chat"
     model = ChatOllama(model=ollama_llm)
 
