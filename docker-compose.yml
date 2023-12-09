@@ -17,13 +17,19 @@ services:
     - ./weaviate_data:/var/lib/weaviate
     restart: on-failure:0
     environment:
-      CONTEXTIONARY_URL: contextionary:9999
+      # CONTEXTIONARY_URL: contextionary:9999
       QUERY_DEFAULTS_LIMIT: 25
       AUTHENTICATION_ANONYMOUS_ACCESS_ENABLED: 'true'
       PERSISTENCE_DATA_PATH: '/var/lib/weaviate'
-      DEFAULT_VECTORIZER_MODULE: 'none'
-      ENABLE_MODULES: ''
+      DEFAULT_VECTORIZER_MODULE: 'text2vec-gpt4all'
+      ENABLE_MODULES: 'text2vec-gpt4all'
       CLUSTER_HOSTNAME: 'node1'
+      GPT4ALL_INFERENCE_API: 'http://text2vec-gpt4all:8080'
+
+  text2vec-gpt4all:
+    image: semitechnologies/gpt4all-inference:all-MiniLM-L6-v2
+
+      # sentence-transformers/all-MiniLM-L6-v2
 
   # contextionary:
   #   environment:

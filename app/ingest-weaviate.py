@@ -4,11 +4,14 @@ import logging
 import os
 
 import click
+
 from langchain.docstore.document import Document
-from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain.embeddings import GPT4AllEmbeddings
 from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
 from langchain.vectorstores import Weaviate
 import torch
+
+# from langchain.embeddings import HuggingFaceInstructEmbeddings
 
 from constants import (
     DOCUMENT_MAP,
@@ -185,10 +188,11 @@ def main(device_type):
     logging.info(f"Loaded {len(documents)} documents from {SOURCE_DIRECTORY}")
     logging.info(f"Split into {len(texts)} chunks of text")
 
-    embeddings = HuggingFaceInstructEmbeddings(
-        model_name=EMBEDDING_MODEL_NAME,
-        model_kwargs={"device": device_type},
-    )
+    # embeddings = HuggingFaceInstructEmbeddings(
+    #     model_name=EMBEDDING_MODEL_NAME,
+    #     model_kwargs={"device": device_type},
+    # )
+    embeddings = GPT4AllEmbeddings()
 
     if texts:
         # import weaviate
