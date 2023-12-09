@@ -37,6 +37,7 @@ CHROMA_SETTINGS = Settings(
     anonymized_telemetry=False,
     is_persistent=True,
 )
+WEAVIATE_URL = "http://localhost:8080"
 
 # Context Window and Max New Tokens
 CONTEXT_WINDOW_SIZE = 4096
@@ -64,12 +65,16 @@ DOCUMENT_MAP = {
     ".xlsx": UnstructuredExcelLoader,
     ".docx": Docx2txtLoader,
     ".doc": Docx2txtLoader,
+    ".js": UnstructuredFileLoader,
+    ".jsx": UnstructuredFileLoader,
+    ".ts": UnstructuredFileLoader,
+    ".tsx": UnstructuredFileLoader,
 }
 
 # Default Instructor Model
 # Uses 1.5 GB of VRAM (High Accuracy with lower VRAM usage)
-# EMBEDDING_MODEL_NAME = "hkunlp/instructor-large"
-EMBEDDING_MODEL_NAME = "llama2:7b-chat"
+EMBEDDING_MODEL_NAME = "hkunlp/instructor-large"
+# EMBEDDING_MODEL_NAME = "llama2:7b-chat"
 
 ####
 # OTHER EMBEDDING MODEL OPTIONS

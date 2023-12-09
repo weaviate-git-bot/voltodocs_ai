@@ -2,3 +2,4 @@ __pycache__
 *.log
 DB
 SOURCE_DOCUMENTS
+weaviate_data

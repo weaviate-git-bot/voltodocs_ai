@@ -4,3 +4,6 @@ start:
 
 ingest:
 	python app/ingest.py
+
+ingest-weaviate:
+	python app/ingest-weaviate.py
