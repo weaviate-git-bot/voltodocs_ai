@@ -33,6 +33,7 @@ def make_chain(
         url=WEAVIATE_URL,
     )
     embeddings = GPT4AllEmbeddings()
+
     # db = Weaviate(
     #     client=client,
     #     text_key="text",
@@ -41,9 +42,10 @@ def make_chain(
     # )
     #
     # retriever = db.as_retriever()
+    #
     retriever = WeaviateHybridSearchRetriever(
         client=client,
-        index_name="LangChain_aec73b8570f0462f880d59590ef91c40",
+        index_name="LangChain",
         # index_name="LangChain",
         text_key="text",
         attributes=[],
@@ -68,8 +70,7 @@ def make_chain(
 
     # RAG chain
     chain = (
-        RunnableParallel(
-            {"context": retriever, "question": RunnablePassthrough()})
+        RunnableParallel({"context": retriever, "question": RunnablePassthrough()})
         | prompt
         | model
         | StrOutputParser()

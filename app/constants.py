@@ -65,6 +65,7 @@ DOCUMENT_MAP = {
     ".xlsx": UnstructuredExcelLoader,
     ".docx": Docx2txtLoader,
     ".doc": Docx2txtLoader,
+    # code loaders
     ".js": UnstructuredFileLoader,
     ".jsx": UnstructuredFileLoader,
     ".ts": UnstructuredFileLoader,

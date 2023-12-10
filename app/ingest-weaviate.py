@@ -15,7 +15,7 @@ import torch
 
 from constants import (
     DOCUMENT_MAP,
-    EMBEDDING_MODEL_NAME,
+    # EMBEDDING_MODEL_NAME,
     INGEST_THREADS,
     SOURCE_DIRECTORY,
     WEAVIATE_URL,
@@ -51,8 +51,7 @@ def load_document_batch(filepaths):
     # create a thread pool
     with ThreadPoolExecutor(len(filepaths)) as exe:
         # load files
-        futures = [exe.submit(load_single_document, name)
-                   for name in filepaths]
+        futures = [exe.submit(load_single_document, name) for name in filepaths]
         # collect data
         if futures is None:
             file_log("Some files failed to submit")
@@ -85,7 +84,7 @@ def load_documents(source_dir: str) -> list[Document]:
         # split the load operations into chunks
         for i in range(0, len(paths), chunksize):
             # select a chunk of filenames
-            filepaths = paths[i: (i + chunksize)]
+            filepaths = paths[i : (i + chunksize)]
             # submit the task
             try:
                 future = executor.submit(load_document_batch, filepaths)
@@ -106,16 +105,25 @@ def load_documents(source_dir: str) -> list[Document]:
     return docs
 
 
+# We use small chunk sizes because
+# ... By default, input text longer than 256 word pieces is truncated.
+# https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+# https://github.com/weaviate/t2v-gpt4all-models?tab=readme-ov-file
+
+CHUNK_SIZE = 1000
+CHUNK_OVERLAP = 200
+
 text_splitter = RecursiveCharacterTextSplitter(
-    chunk_size=1000, chunk_overlap=200)
+    chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
+)
 python_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.PYTHON, chunk_size=880, chunk_overlap=200
+    language=Language.PYTHON, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
 )
 ts_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.TS, chunk_size=880, chunk_overlap=200
+    language=Language.TS, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
 )
 js_splitter = RecursiveCharacterTextSplitter.from_language(
-    language=Language.JS, chunk_size=880, chunk_overlap=200
+    language=Language.JS, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
 )
 
 extension_handlers = {
@@ -211,7 +219,7 @@ def main(device_type):
             texts,
             weaviate_url=WEAVIATE_URL,
             embedding=embeddings,
-            # index_name="voltodocs",
+            index_name="LangChain",
             # text_key="text",
         )
         print(f"Indexed in index: {db._index_name}")
