@@ -203,3 +203,26 @@ MODEL_BASENAME = "llama-2-7b-chat.Q4_K_M.gguf"
 ####
 # MODEL_ID = "TheBloke/Llama-2-7B-Chat-AWQ"
 # MODEL_BASENAME = "model.safetensors.awq"
+
+
+DEVICE_TYPES = [
+    "cpu",
+    "cuda",
+    "ipu",
+    "xpu",
+    "mkldnn",
+    "opengl",
+    "opencl",
+    "ideep",
+    "hip",
+    "ve",
+    "fpga",
+    "ort",
+    "xla",
+    "lazy",
+    "vulkan",
+    "mps",
+    "meta",
+    "hpu",
+    "mtia",
+]
