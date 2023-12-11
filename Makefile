@@ -7,3 +7,6 @@ ingest:
 
 ingest-weaviate:
 	python app/ingest-weaviate.py
+
+ingest-faiss:
+	python app/ingest-faiss.py

@@ -4,25 +4,11 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from langserve import add_routes
 
-from constants import (
-    WEAVIATE_URL,
-    EMBEDDING_MODEL_NAME,
-    # DOCUMENT_MAP,
-    # INGEST_THREADS,
-    # PERSIST_DIRECTORY,
-    # SOURCE_DIRECTORY,
-)
+import constants
 
 
 app = FastAPI()
-voltodocs_chain = make_chain(
-    WEAVIATE_URL,
-    EMBEDDING_MODEL_NAME,
-    # DOCUMENT_MAP,
-    # INGEST_THREADS,
-    # PERSIST_DIRECTORY,
-    # SOURCE_DIRECTORY,
-)
+voltodocs_chain = make_chain(constants)
 
 
 @app.get("/")
