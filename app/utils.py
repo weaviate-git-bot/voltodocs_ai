@@ -1,4 +1,11 @@
-from langchain.text_splitter import Language, RecursiveCharacterTextSplitter
+from langchain.embeddings import HuggingFaceInstructEmbeddings
+from langchain.embeddings import huggingface
+from langchain.text_splitter import (
+    CharacterTextSplitter,
+    Language,
+    RecursiveCharacterTextSplitter,
+    TextSplitter,
+)
 from collections import defaultdict
 from langchain.docstore.document import Document
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
@@ -117,6 +124,7 @@ js_splitter = RecursiveCharacterTextSplitter.from_language(
     language=Language.JS, chunk_size=CHUNK_SIZE, chunk_overlap=CHUNK_OVERLAP
 )
 
+
 extension_handlers = {
     ".md": text_splitter,
     ".txt": text_splitter,
@@ -128,15 +136,23 @@ extension_handlers = {
 }
 
 
-def split_documents(documents: list[Document]) -> list[Document]:
+def split_documents(documents: list[Document], tokenizer=None) -> list[Document]:
     # Splits documents for correct Text Splitter
+
     docs = defaultdict(list)
+    if tokenizer:
+        huggingface_token_splitter = CharacterTextSplitter.from_huggingface_tokenizer(
+            tokenizer
+        )
+        extension_handlers["tokenized"] = huggingface_token_splitter
 
     for doc in documents:
         if doc is not None:
             file_extension = os.path.splitext(doc.metadata["source"])[1]
             if file_extension not in extension_handlers:
                 file_extension = ".txt"
+
+            file_extension = "tokenized"
 
             docs[file_extension].append(doc)
 

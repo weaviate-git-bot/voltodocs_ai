@@ -55,6 +55,8 @@ def make_chain(
     prompt = ChatPromptTemplate.from_template(template)
 
     ollama_llm = "llama2:7b-chat"
+    ollama_llm = "yarn-mistral"  # 64k context size
+    # yarn-mistral:7b-128k
     model = ChatOllama(model=ollama_llm)
 
     # RAG chain

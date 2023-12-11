@@ -23,17 +23,19 @@ def main(device_type):
     # Load documents and split in chunks
     logging.info(f"Loading documents from {SOURCE_DIRECTORY}")
 
-    documents = load_documents(SOURCE_DIRECTORY)
-    texts = split_documents(documents)
-
-    logging.info(f"Loaded {len(documents)} documents from {SOURCE_DIRECTORY}")
-    logging.info(f"Split into {len(texts)} chunks of text")
-
     embeddings = HuggingFaceInstructEmbeddings(
         model_name=EMBEDDING_MODEL_NAME,
         model_kwargs={"device": device_type},
         # embed_instruction="Represent the Javascript software library document for retrieval:",
     )
+
+    tokenizer = embeddings.client.tokenizer
+
+    documents = load_documents(SOURCE_DIRECTORY)
+    texts = split_documents(documents, tokenizer)
+
+    logging.info(f"Loaded {len(documents)} documents from {SOURCE_DIRECTORY}")
+    logging.info(f"Split into {len(texts)} chunks of text")
 
     if texts:
         db = FAISS.from_documents(
