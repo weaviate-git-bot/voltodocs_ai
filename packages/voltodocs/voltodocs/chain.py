@@ -1,13 +1,17 @@
 import weaviate
 
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+from langchain.llms import LlamaCpp
 from langchain.retrievers.weaviate_hybrid_search import WeaviateHybridSearchRetriever
-from langchain.chat_models import ChatOllama
 from langchain.prompts import ChatPromptTemplate
 from langchain.pydantic_v1 import BaseModel
 from langchain.schema.output_parser import StrOutputParser
 from langchain.schema.runnable import RunnableParallel, RunnablePassthrough
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceInstructEmbeddings
+
+# from langchain.chat_models import ChatOllama
 
 
 class Question(BaseModel):
@@ -37,7 +41,9 @@ def faiss_retriever(EMBEDDING_MODEL_NAME):
         bindata = f.read()
 
     db = FAISS.deserialize_from_bytes(bindata, embeddings)
-    return db.as_retriever()
+    return db.as_retriever(
+        search_type="mmr", search_kwargs={"k": 10, "lambda_mult": 0.8}
+    )
 
 
 def make_chain(
@@ -54,10 +60,29 @@ def make_chain(
     """
     prompt = ChatPromptTemplate.from_template(template)
 
-    ollama_llm = "llama2:7b-chat"
-    ollama_llm = "yarn-mistral"  # 64k context size
+    # ollama_llm = "llama2:7b-chat"
+    # ollama_llm = "yarn-mistral"  # 64k context size
     # yarn-mistral:7b-128k
-    model = ChatOllama(model=ollama_llm)
+    # model = ChatOllama(model=ollama_llm)
+
+    model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
+    # Change this value based on your model and your GPU VRAM pool.
+    n_gpu_layers = 30
+    n_batch = (
+        # Should be between 1 and n_ctx, consider the amount of VRAM in your GPU.
+        512
+    )
+    # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+
+    # Make sure the model path is correct for your system!
+    model = LlamaCpp(
+        model_path=model_path,
+        n_ctx=9000,
+        n_gpu_layers=n_gpu_layers,
+        n_batch=n_batch,
+        # callback_manager=callback_manager,
+        verbose=True,  # Verbose is required to pass to the callback manager
+    )
 
     # RAG chain
     chain = (

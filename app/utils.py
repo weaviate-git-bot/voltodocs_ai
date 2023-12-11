@@ -152,7 +152,8 @@ def split_documents(documents: list[Document], tokenizer=None) -> list[Document]
             if file_extension not in extension_handlers:
                 file_extension = ".txt"
 
-            file_extension = "tokenized"
+            if tokenizer:
+                file_extension = "tokenized"
 
             docs[file_extension].append(doc)
 

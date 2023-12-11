@@ -32,7 +32,7 @@ def main(device_type):
     tokenizer = embeddings.client.tokenizer
 
     documents = load_documents(SOURCE_DIRECTORY)
-    texts = split_documents(documents, tokenizer)
+    texts = split_documents(documents, tokenizer=None)
 
     logging.info(f"Loaded {len(documents)} documents from {SOURCE_DIRECTORY}")
     logging.info(f"Split into {len(texts)} chunks of text")
