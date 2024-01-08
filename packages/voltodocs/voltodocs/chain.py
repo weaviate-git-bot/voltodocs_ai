@@ -9,9 +9,10 @@ from langchain.schema.runnable import RunnableParallel, RunnablePassthrough
 from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 
+from langchain.callbacks.manager import CallbackManager
+from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
+
 # from langchain.chat_models import ChatOllama
-# from langchain.callbacks.manager import CallbackManager
-# from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 
 class Question(BaseModel):
@@ -53,11 +54,11 @@ def make_chain(
     # Optionally, pull from the Hub
     # from langchain import hub
     # prompt = hub.pull("rlm/rag-prompt")
-    template = """Answer the question based only on the following context.
-    Refuse to answer if the answer is not in the context:
-    {context}
+    template = """You are a helpful assistant that answers questions. You answer questions only based on the context information that is provided to you. Answer the following question:
+    {question}
 
-    Question: {question}
+    Context information that will be used to answer the question:
+    {context}
     """
     prompt = ChatPromptTemplate.from_template(template)
 
@@ -66,18 +67,21 @@ def make_chain(
     # yarn-mistral:7b-128k
     # model = ChatOllama(model=ollama_llm)
 
-    model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
+    model_path = (
+        "/mnt/docker/work/sd/text-generation-webui/models/llama-2-7b.Q5_K_S.gguf"
+    )
+    # yarn-mistral-7b-64k.Q4_K_M.gguf"
     # model_path = "/mnt/docker/work/sd/text-generation-webui/models/NousResearch_Yarn-Mistral-7b-64k"
     # model_path = "/mnt/docker/work/sd/text-generation-webui/models/openassistant-llama2-13b-orca-8k-3319.Q4_K_M.gguf"
     # model_path = "TheBloke/Yarn-Mistral-7B-64k-GGUF"
 
     # Change this value based on your model and your GPU VRAM pool.
-    n_gpu_layers = 30
+    n_gpu_layers = 33
     n_batch = (
         # Between 1 and n_ctx, consider the amount of VRAM in your GPU.
         512
     )
-    # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
+    callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
 
     # Make sure the model path is correct for your system!
     model = LlamaCpp(
@@ -85,7 +89,7 @@ def make_chain(
         n_ctx=9000,
         n_gpu_layers=n_gpu_layers,
         n_batch=n_batch,
-        # callback_manager=callback_manager,
+        callback_manager=callback_manager,
         verbose=True,  # Verbose is required to pass to the callback manager
     )
 
