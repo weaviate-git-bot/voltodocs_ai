@@ -53,7 +53,7 @@ def make_chain(
     # Optionally, pull from the Hub
     # from langchain import hub
     # prompt = hub.pull("rlm/rag-prompt")
-    template = """Answer the question based only on the following context:
+    template = """Answer the question based only on the following context. Refuse to answer if the answer is not in the context:
     {context}
 
     Question: {question}
@@ -65,9 +65,10 @@ def make_chain(
     # yarn-mistral:7b-128k
     # model = ChatOllama(model=ollama_llm)
 
-    model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
+    # model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
+    model_path = "/mnt/docker/work/sd/text-generation-webui/models/openassistant-llama2-13b-orca-8k-3319.Q4_K_M.gguf"
     # Change this value based on your model and your GPU VRAM pool.
-    n_gpu_layers = 30
+    n_gpu_layers = 20
     n_batch = (
         # Should be between 1 and n_ctx, consider the amount of VRAM in your GPU.
         512
