@@ -1,7 +1,5 @@
 import weaviate
 
-from langchain.callbacks.manager import CallbackManager
-from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 from langchain.llms import LlamaCpp
 from langchain.retrievers.weaviate_hybrid_search import WeaviateHybridSearchRetriever
 from langchain.prompts import ChatPromptTemplate
@@ -12,6 +10,8 @@ from langchain.vectorstores import FAISS
 from langchain.embeddings import HuggingFaceInstructEmbeddings
 
 # from langchain.chat_models import ChatOllama
+# from langchain.callbacks.manager import CallbackManager
+# from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
 
 class Question(BaseModel):
@@ -42,7 +42,7 @@ def faiss_retriever(EMBEDDING_MODEL_NAME):
 
     db = FAISS.deserialize_from_bytes(bindata, embeddings)
     return db.as_retriever(
-        search_type="mmr", search_kwargs={"k": 10, "lambda_mult": 0.8}
+        search_type="mmr", search_kwargs={"k": 6, "lambda_mult": 0.8}
     )
 
 
@@ -53,7 +53,8 @@ def make_chain(
     # Optionally, pull from the Hub
     # from langchain import hub
     # prompt = hub.pull("rlm/rag-prompt")
-    template = """Answer the question based only on the following context. Refuse to answer if the answer is not in the context:
+    template = """Answer the question based only on the following context.
+    Refuse to answer if the answer is not in the context:
     {context}
 
     Question: {question}
@@ -65,12 +66,15 @@ def make_chain(
     # yarn-mistral:7b-128k
     # model = ChatOllama(model=ollama_llm)
 
-    # model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
-    model_path = "/mnt/docker/work/sd/text-generation-webui/models/openassistant-llama2-13b-orca-8k-3319.Q4_K_M.gguf"
+    model_path = "/mnt/docker/work/sd/text-generation-webui/models/yarn-mistral-7b-64k.Q4_K_M.gguf"
+    # model_path = "/mnt/docker/work/sd/text-generation-webui/models/NousResearch_Yarn-Mistral-7b-64k"
+    # model_path = "/mnt/docker/work/sd/text-generation-webui/models/openassistant-llama2-13b-orca-8k-3319.Q4_K_M.gguf"
+    # model_path = "TheBloke/Yarn-Mistral-7B-64k-GGUF"
+
     # Change this value based on your model and your GPU VRAM pool.
-    n_gpu_layers = 20
+    n_gpu_layers = 30
     n_batch = (
-        # Should be between 1 and n_ctx, consider the amount of VRAM in your GPU.
+        # Between 1 and n_ctx, consider the amount of VRAM in your GPU.
         512
     )
     # callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
@@ -86,13 +90,10 @@ def make_chain(
     )
 
     # RAG chain
-    chain = (
-        RunnableParallel(
-            {"context": retriever, "question": RunnablePassthrough()})
-        | prompt
-        | model
-        | StrOutputParser()
+    runnable = RunnableParallel(
+        {"context": retriever, "question": RunnablePassthrough()}
     )
+    chain = runnable | prompt | model | StrOutputParser()
 
     chain = chain.with_types(input_type=Question)
     return chain

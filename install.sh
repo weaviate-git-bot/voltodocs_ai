@@ -14,3 +14,5 @@ virtualenv .venv
 
 .venv/bin/python app/server.py
 .venv/bin/pip install sse_starlette
+.venv/bin/pip install git+https://github.com/huggingface/transformers
+.venv/bin/pip install ctransformers
